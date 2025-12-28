@@ -8,31 +8,31 @@ Produce a Build First submission that demonstrates:
 - production-grade hygiene (repo, docs, tests, deploy)
 
 ## Workstreams
-### A) Discovery (Problem Mining)
-**Outputs**
-- lightweight as-is workflow map(s)
-- 2 stakeholder interviews (Exec-01, MAYBE Exec-02) with transcripts (anonymized)
-- list of pains/bottlenecks with quantified signals (time/$/frequency)
-- constraints & risks (data access, compliance, change management)
+### A) Discovery (Problem Mining) ✅ **COMPLETE**
+**Outputs** (delivered)
+- ✅ lightweight as-is workflow map (`docs/01-discovery/process-maps/As-Is-Purchasing-Cycle.pdf`)
+- ✅ 1 stakeholder interview (Exec-01) with transcript (`docs/01-discovery/interview/Int_Exec_1.md`)
+- ✅ list of pains/bottlenecks with quantified signals (`docs/02-synthesis/INSIGHTS.md`)
+- ✅ constraints & risks identified (ToS compliance, data access, vendor skepticism)
 
 **Method**
 - Start interviews with: role → excited about AI → skeptical about AI
 - Walk through day-to-day / workflow step-by-step
 - Quantify impact and prior attempts to solve
 
-### B) Synthesis (Turn unstructured → structured)
-**Outputs**
-- consolidated pain points
-- opportunity list (ranked)
-- ROI hypothesis per opportunity (investment vs return)
-- selection rationale for the sprint MVP (why this, why now)
+### B) Synthesis (Turn unstructured → structured) ✅ **COMPLETE**
+**Outputs** (delivered)
+- ✅ consolidated pain points (`docs/02-synthesis/INSIGHTS.md` — 10 key insights)
+- ✅ opportunity list (ranked) (`docs/02-synthesis/OPPORTUNITY_ID.md` — O1–O12)
+- ✅ ROI hypothesis per opportunity (`docs/02-synthesis/ROI_PRIORITIZATION.md`)
+- ✅ selection rationale for the sprint MVP (`docs/02-synthesis/MVP_DECISION.md`)
 
-### C) MVP Definition (Scope + success metrics)
-**Outputs**
-- one-sentence MVP scope
-- explicit success metrics (what improves, by how much)
-- acceptance criteria for the demo
-- cut list (what will NOT be built)
+### C) MVP Definition (Scope + success metrics) ✅ **COMPLETE**
+**Outputs** (delivered)
+- ✅ one-sentence MVP scope: "Track ~10 products across ≥3 retailers, record price snapshots over time, show price deltas over the last X hours, and demonstrate a simulated 'alert trigger' flow"
+- ✅ explicit success metrics: Coverage (≥10 products × ≥3 retailers), History (UI shows last X hours), Alert proof (tests + UI preview)
+- ✅ acceptance criteria defined (`docs/02-synthesis/MVP_DECISION.md`)
+- ✅ cut list defined (real-time guarantee, multi-channel integrations, ToS-violating scraping)
 
 ### D) Build + Integrate (Execution)
 **Outputs**
@@ -54,23 +54,23 @@ Produce a Build First submission that demonstrates:
 - final README polish
 
 ## Timeline (48 hours)
-### Phase 1: Set up + Discovery
-- repo + docs scaffolding
-- interview guide finalized
-- 1-2 interviews completed + transcribed
-- initial workflow map + quantified pain points
+### Phase 1: Set up + Discovery ✅ **COMPLETE**
+- ✅ repo + docs scaffolding
+- ✅ interview guide finalized
+- ✅ 1 interview completed + transcribed (Exec-01)
+- ✅ initial workflow map + quantified pain points
 
-### Phase 2: Synthesis + MVP selection
-- synthesize insights
-- rank opportunities by ROI and feasibility
-- lock MVP scope + acceptance criteria
+### Phase 2: Synthesis + MVP selection ✅ **COMPLETE**
+- ✅ synthesize insights (10 insights documented)
+- ✅ rank opportunities by ROI and feasibility (O1 ranked #2, MVP wedge selected)
+- ✅ lock MVP scope + acceptance criteria (Price Monitoring POC)
 
-### Phase 3: Build + validate
+### Phase 3: Build + validate 🔄 **IN PROGRESS**
 - implement MVP incrementally
 - validate integration paths
 - add tests for core logic
 
-### Phase 4: Deploy + demo
+### Phase 4: Deploy + demo ⏳ **PENDING**
 - deploy + smoke test
 - finalize README + docs
 - record demo video + submit
