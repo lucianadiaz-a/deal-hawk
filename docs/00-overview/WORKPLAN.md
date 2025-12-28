@@ -88,7 +88,7 @@ Produce a Build First submission that demonstrates:
 - ✅ implemented MVP incrementally (DB, services, connectors, UI)
 - ✅ validated integration paths (seed → ingest → pricing → alerts → UI)
 - ✅ added tests for core logic (seed integrity, alerts, pricing)
-- ✅ Streamlit app running locally with full functionality
+- ✅ React frontend running locally with full functionality
 
 **Deliverables completed:**
 - `backend/db.py`: SQLite schema with WAL mode, foreign keys, indexes
@@ -96,9 +96,9 @@ Produce a Build First submission that demonstrates:
 - `backend/connectors/fixtures.py`: deterministic fixture-based pricing
 - `scripts/seed_db.py`: idempotent seeding with 10 products × 3 retailers
 - `scripts/run_ingest.py`: ingestion cycle runner
-- `app/main.py`: Streamlit UI (overview, detail, alerts)
+- `frontend/`: React + TypeScript UI (overview, detail, alerts)
 - `tests/`: test_seed_integrity.py, test_pricing.py, test_alerts.py
-- `requirements.txt`: streamlit, pydantic, pytest
+- `requirements.txt`: fastapi, pydantic, pytest
 
 ### Phase 4: Deploy + demo 🔄 **IN PROGRESS**
 - ⏳ deploy + smoke test

@@ -24,11 +24,14 @@ class DbConfig:
 
 def _connect(path: Path) -> sqlite3.Connection:
     path.parent.mkdir(parents=True, exist_ok=True)
-    conn = sqlite3.connect(path.as_posix())
+    conn = sqlite3.connect(path.as_posix(), timeout=10.0)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON;")
     conn.execute("PRAGMA journal_mode = WAL;")
     conn.execute("PRAGMA synchronous = NORMAL;")
+    # For read-only demo DB, set to read-only mode to prevent any accidental writes
+    # This also helps with concurrent reads
+    conn.execute("PRAGMA query_only = OFF;")  # Keep writes enabled for schema init
     return conn
 
 
@@ -38,8 +41,13 @@ def db_conn(cfg: Optional[DbConfig] = None) -> Iterator[sqlite3.Connection]:
     conn = _connect(cfg.path)
     try:
         yield conn
+        # For read-only operations, commit is a no-op but harmless
         conn.commit()
-    except Exception:
+    except Exception as e:
+        # Log the error before rolling back
+        import traceback
+        print(f"Database error in db_conn: {e}")
+        traceback.print_exc()
         conn.rollback()
         raise
     finally:

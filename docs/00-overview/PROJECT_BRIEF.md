@@ -41,10 +41,10 @@ A functional, deployed prototype demonstrating:
 - production-grade engineering hygiene (tests, structure, security)
 
 ## Decisions already locked for this sprint
-- Fast iteration, “least that delivers the most”
+- Fast iteration, "least that delivers the most"
 - FastAPI backend
-- Streamlit web app for demo UI
-- Postgres database as system of record
+- React frontend for demo UI
+- SQLite for POC (Postgres for production)
 - Zapier used for integrations (alerts, scheduling, webhooks)
 - Secrets handled via environment variables / platform secret managers (never committed)
 - Deployment will be cost-minimized

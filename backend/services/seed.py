@@ -133,3 +133,4 @@ def reset_db(conn: sqlite3.Connection) -> None:
     conn.execute("DELETE FROM products")
     conn.execute("DELETE FROM retailers")
 
+

@@ -29,7 +29,7 @@ Track ~10 products across **≥3 retailers**, record price snapshots over time, 
    - “Live” proof is: the fetch cycle runs on demand and produces fresh timestamps; historical movement is shown over the last X hours based on stored snapshots.
 
 3) **Visualization**
-   - Streamlit dashboard shows:
+   - React dashboard shows:
      - current price per retailer
      - delta over last X hours
      - simple trend view (table + optional chart) per product

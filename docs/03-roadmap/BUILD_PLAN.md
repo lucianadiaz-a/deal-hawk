@@ -3,7 +3,8 @@
 This is the implementation plan for the Price Monitoring POC (deal hawk)
 
 ## Architecture (MVP)
-- Streamlit UI in `app/`
+- React UI in `frontend/`
+- FastAPI backend in `backend/api/`
 - Domain + DB + services as a small Python package in `backend/`
 - SQLite as the system of record (local file)
 - Retailer “connectors” start as fixtures (swap later)
@@ -63,9 +64,9 @@ See `docs/00-overview/TRADEOFFS.md` for decision rationale.
 - deterministic alert trigger using controlled price movement
 - event stored with preview text
 
-### 6) Streamlit UI
+### 6) React UI
 **Deliverables**
-- overview table (current + delta + last updated)
+- overview page (current + delta + last updated)
 - detail view (history)
 - alert log (events + preview)
 

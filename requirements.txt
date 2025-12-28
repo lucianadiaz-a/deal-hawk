@@ -1,4 +1,5 @@
-streamlit>=1.38
 pydantic>=2.7
 pytest>=8.0
 pandas>=2.2
+fastapi>=0.104.0
+uvicorn[standard]>=0.24.0
