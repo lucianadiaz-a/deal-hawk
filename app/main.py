@@ -14,6 +14,7 @@ from backend.db import db_conn, init_schema
 from backend.services.alerts import evaluate_alerts
 from backend.services.ingest import run_ingest_cycle
 from backend.services.pricing import get_listing_price_summary, list_price_summaries
+from backend.services.seed import reset_db, seed_from_json
 
 
 def _fmt_money(cents: int | None) -> str:
@@ -49,6 +50,46 @@ with st.sidebar:
             res = evaluate_alerts(conn, window_hours=int(window_hours), threshold_pct=float(threshold_pct))
         st.success(f"Evaluated {res.evaluated} listings. Triggered {res.triggered} alerts.")
 
+    st.divider()
+    st.header("Data")
+
+    if st.button("Seed DB (idempotent)", use_container_width=True):
+        with db_conn() as conn:
+            init_schema(conn)
+            seed_result = seed_from_json(conn, Path("data/seed_listings.json"))
+        st.success(
+            f"Seeded: {seed_result.products} products, "
+            f"{seed_result.retailers} retailers, {seed_result.listings} listings."
+        )
+
+    reset_confirmed = st.checkbox("I understand this deletes demo data")
+    if st.button("Reset DB (danger)", use_container_width=True, disabled=not reset_confirmed):
+        with db_conn() as conn:
+            reset_db(conn)
+        st.success("Database reset complete. All data deleted.")
+
+    if st.button("Bootstrap demo data", use_container_width=True):
+        with db_conn() as conn:
+            init_schema(conn)
+            reset_db(conn)
+            seed_result = seed_from_json(conn, Path("data/seed_listings.json"))
+            
+            # Run ingest cycle 3 times
+            total_snapshots = 0
+            for _ in range(3):
+                res = run_ingest_cycle(conn)
+                total_snapshots += res.snapshots_written
+            
+            # Evaluate alerts once
+            alert_res = evaluate_alerts(conn, window_hours=int(window_hours), threshold_pct=float(threshold_pct))
+        
+        st.success(
+            f"Bootstrap complete! "
+            f"{seed_result.listings} listings, "
+            f"{total_snapshots} snapshots, "
+            f"{alert_res.triggered} alerts."
+        )
+
 
 tab_overview, tab_listing, tab_alerts = st.tabs(["Overview", "Listing detail", "Alert log"])
 
@@ -57,23 +98,26 @@ with tab_overview:
         init_schema(conn)
         summaries = list_price_summaries(conn, window_hours=int(window_hours), active_only=True)
 
-    rows = []
-    for s in summaries:
-        rows.append(
-            {
-                "listing_id": s.listing_id,
-                "product": s.product_name,
-                "retailer": s.retailer_name,
-                "current": _fmt_money(s.current_price_cents),
-                "window_start": _fmt_money(s.window_start_price_cents),
-                "delta": _fmt_money(s.delta_cents),
-                "delta_pct": _fmt_pct(s.delta_pct),
-                "last_updated": s.current_captured_at or "—",
-            }
-        )
+    if not summaries:
+        st.warning("⚠️ No listings found. Click **Bootstrap demo data** in the sidebar to get started.")
+    else:
+        rows = []
+        for s in summaries:
+            rows.append(
+                {
+                    "listing_id": s.listing_id,
+                    "product": s.product_name,
+                    "retailer": s.retailer_name,
+                    "current": _fmt_money(s.current_price_cents),
+                    "window_start": _fmt_money(s.window_start_price_cents),
+                    "delta": _fmt_money(s.delta_cents),
+                    "delta_pct": _fmt_pct(s.delta_pct),
+                    "last_updated": s.current_captured_at or "—",
+                }
+            )
 
-    df = pd.DataFrame(rows)
-    st.dataframe(df, use_container_width=True, hide_index=True)
+        df = pd.DataFrame(rows)
+        st.dataframe(df, use_container_width=True, hide_index=True)
 
 with tab_listing:
     with db_conn() as conn:
@@ -91,7 +135,7 @@ with tab_listing:
 
     options = {f"{int(r['listing_id'])} — {r['product']} @ {r['retailer']}": int(r["listing_id"]) for r in ids}
     if not options:
-        st.warning("No listings found. Run seed first: python scripts/seed_db.py")
+        st.warning("⚠️ No listings found. Click **Bootstrap demo data** in the sidebar to get started.")
     else:
         label = st.selectbox("Select listing", list(options.keys()))
         listing_id = options[label]

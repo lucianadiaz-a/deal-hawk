@@ -97,12 +97,19 @@ deal-hawk/
    python -m backend.db init
    ```
 
-5. **Seed data:**
+5. **Run the Streamlit app:**
    ```bash
-   python scripts/seed_db.py
+   streamlit run app/main.py
    ```
 
-   This populates the database with ~10 products across ≥3 retailers from `data/seed_listings.json`. The seed script is **idempotent**: running it multiple times will not create duplicate products or listings, and it preserves existing price history.
+6. **Bootstrap demo data (via UI):**
+   - In the Streamlit sidebar, click **Bootstrap demo data** to seed the database, run ingestion cycles, and generate sample alerts.
+   - Alternatively, you can manually seed using the CLI:
+     ```bash
+     python scripts/seed_db.py
+     ```
+
+   The seed script is **idempotent**: running it multiple times will not create duplicate products or listings, and it preserves existing price history.
 
    **Verification:** Re-running seed should NOT change listing count or delete snapshots. Verify with:
    ```bash
@@ -184,6 +191,34 @@ Minimum test coverage: deal detection logic (thresholds, edge cases) and parsing
 (See `docs/03-roadmap/BUILD_PLAN.md` for full architecture and data model.)
 
 **Note:** The project brief mentions Postgres as the system of record (`docs/00-overview/PROJECT_BRIEF.md`), but the build plan specifies SQLite for the POC (`docs/03-roadmap/BUILD_PLAN.md`). SQLite is used for local development; Postgres would be used for production deployment.
+
+## Deployment Notes
+
+**For Streamlit Cloud or other cloud deployments:**
+1. **Do NOT commit the SQLite database file** (`data/deal_hawk.sqlite3`) to version control.
+2. The database will be automatically created on first run via `db_conn()`.
+3. Use the **Bootstrap demo data** button in the Streamlit UI sidebar to seed the database after deployment.
+4. The seeding logic is deployment-safe: it works with ephemeral filesystems and does not depend on pre-existing database files.
+5. All data management (seed, reset, bootstrap) is available through the Streamlit UI under the "Data" section in the sidebar.
+
+### Streamlit Cloud Setup
+
+**Required files:**
+- `runtime.txt` — Specifies Python 3.11
+- `requirements.txt` — All runtime dependencies
+- `data/seed_listings.json` — Seed data for bootstrapping
+
+**Configuration:**
+- **Repository:** `lucianadiaz-a/deal-hawk`
+- **Branch:** `deploy` (or `main`/`prod` as needed)
+- **Main file path:** `app/main.py`
+- **Python version:** Auto-detected from `runtime.txt`
+
+**First-time setup:**
+After deployment completes, click **Bootstrap demo data** in the sidebar to initialize the database with seed data, run ingestion cycles, and generate sample alerts.
+
+**Environment variables:**
+- `DEAL_HAWK_DB_PATH`: Override default database path (default: `data/deal_hawk.sqlite3`)
 
 ## Demo Instructions
 
