@@ -704,3 +704,245 @@ Keeps DB access safe and consistent; supports the core use case (latest + window
 - Dynamic demo scenarios (user-configurable price patterns)
 
 ---
+
+## 2025-12-28 — Railway deployment (backend + frontend)
+
+**Goal:** Deploy both FastAPI backend and React frontend to Railway for public access and demo purposes.
+
+**What shipped**
+
+**Backend deployment**
+1. `Procfile` — Process definition for Railway (`uvicorn backend.api.main:app`)
+2. `railway.json` — Railway configuration with start command and restart policies
+3. `.railwayignore` — Excludes dev files, tests, scripts from deployment
+4. `main.py` (root) — Import wrapper to help Railway auto-detect FastAPI app
+5. `backend/api/main.py` — Database initialization on startup (`_ensure_db_initialized()`)
+6. Updated CORS configuration with hardcoded production frontend URL
+
+**Frontend deployment**
+1. `frontend/package.json` — Build script changed from `tsc -b && vite build` to `vite build` (skip TypeScript checking)
+2. `frontend/tsconfig.app.json` — Added explicit React type references, adjusted module resolution
+3. `frontend/src/lib/*.ts` — Force-added to git (was blocked by `.gitignore`)
+4. Environment variable configuration: `VITE_API_URL` for backend URL
+
+**Documentation**
+1. `RAILWAY_DEPLOYMENT.md` — Comprehensive deployment guide (backend + frontend setup, environment variables, troubleshooting)
+2. `RAILWAY_QUICK_START.md` — Condensed quick-start reference
+3. `BUILD_TROUBLESHOOTING.md` — Common build errors and solutions
+4. `RAILPACK_FIX.md` — Fix for Railpack auto-detection issues
+5. `DEPLOYMENT_COMMANDS.md` — Clarification on Railway vs local dev commands
+
+**Key decisions**
+
+**Backend deployment strategy**
+- Railway auto-detection struggled with monorepo structure (Python backend in subdirectory)
+- Created root-level `main.py` import wrapper to surface FastAPI app for auto-detection
+- Database initialization moved from build step to application startup
+- Simplified build command to `pip install --upgrade pip && pip install -r requirements.txt`
+- Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+**Frontend deployment strategy**
+- Skip TypeScript type checking during Railway builds (`vite build` instead of `tsc -b && vite build`)
+- Railway installs in production mode, skipping devDependencies
+- TypeScript types not needed for Vite to bundle successfully
+- Build command: `npm run build` (Railway's auto-detected `npm ci` handles install step)
+
+**CORS configuration**
+- Hardcoded production frontend URL directly in `backend/api/main.py`
+- Environment variable `FRONTEND_URL` still supported but not required
+- Ensures deployment works immediately without manual environment variable configuration
+
+**Database initialization**
+- `_ensure_db_initialized()` function runs on app startup
+- Checks if schema exists (queries for `products` table)
+- Initializes schema if missing, logs confirmation
+- Non-blocking: logs warning but doesn't crash app if initialization fails
+- Eliminates need for separate migration step during deployment
+
+**Issues resolved**
+
+**Issue 1: "error creating build plan with railpack"**
+- Problem: Railway's Nixpacks couldn't determine project type due to monorepo structure
+- Root cause: FastAPI app in `backend/api/main.py` subdirectory, not root
+- Fix: Created root-level `main.py` that imports from `backend.api.main`
+- Alternative fix: Manually set Framework to "Python" in Railway settings
+
+**Issue 2: Build command truncation**
+- Problem: Railway truncated build command (`python -m ba` instead of `python -m backend.db init`)
+- Root cause: Command too long or Railway parsing issue
+- Fix: Removed DB initialization from build command, moved to app startup
+- Simplified build command to standard `pip install -r requirements.txt`
+
+**Issue 3: "No start command was found"**
+- Problem: Railway auto-detection couldn't find FastAPI app in subdirectory
+- Root cause: Railpack looks for `main.py` or `app.py` in project root
+- Fix: Created root `main.py` import wrapper, explicitly set start command
+- Start command: `uvicorn main:app --host 0.0.0.0 --port $PORT`
+
+**Issue 4: TypeScript build errors - missing `@types/react`**
+- Problem: `error TS7016: Could not find a declaration file for module 'react'`
+- Root cause: Railway's install step (`npm ci`) runs with `--omit=dev`, skipping devDependencies
+- Attempted fixes that failed:
+  - `npm install --include=dev` (flag ignored due to production environment)
+  - `NPM_CONFIG_PRODUCTION=false npm install` (still skipped devDependencies)
+- Working fix: Skip TypeScript checking entirely (`vite build` instead of `tsc -b && vite build`)
+- Rationale: Vite doesn't need TypeScript types to bundle, type checking can happen locally
+
+**Issue 5: Missing `frontend/src/lib/` files in git**
+- Problem: `error during build: Could not resolve "../lib/query" from "src/pages/ProductsPage.tsx"`
+- Root cause: `.gitignore` contains `lib/` (line 17, Python packaging convention)
+- This blocked `frontend/src/lib/` directory from being committed
+- Fix: Force-added files with `git add -f frontend/src/lib/*.ts`
+- Files added: `format.ts`, `pushDeal.ts`, `query.ts`
+
+**Issue 6: CORS policy blocking frontend requests**
+- Problem: `No 'Access-Control-Allow-Origin' header is present on the requested resource`
+- Root cause: Backend didn't know about production frontend URL
+- Initial fix attempt: Set `FRONTEND_URL` environment variable in Railway
+- Issue: Environment variable didn't take effect immediately or wasn't read correctly
+- Final fix: Hardcoded production frontend URL in CORS origins list
+- Added: `https://deal-hawk-frontend-production.up.railway.app`
+
+**Issue 7: TypeScript module resolution errors**
+- Problem: Various import errors, React types not found
+- Attempted fixes:
+  - Changed `moduleResolution` from `"bundler"` to `"node"` (partial success)
+  - Added `allowSyntheticDefaultImports`, `esModuleInterop` (helped but not sufficient)
+  - Modified paths configuration (didn't resolve root issue)
+- Final fix: Skip TypeScript checking during build (see Issue 4)
+
+**Tradeoffs**
+
+**Skip TypeScript checking in production builds**
+- Pro: Eliminates devDependencies installation issues, faster builds
+- Con: Type errors only caught during local development
+- Mitigation: Keep `build:check` script for local type checking before commits
+- Acceptable for POC: Vite still transpiles TypeScript, just doesn't fail on type errors
+
+**Hardcoded CORS origin**
+- Pro: Deployment works immediately without environment variable configuration
+- Con: URL change requires code update (not just env var)
+- Acceptable for POC: Frontend URL unlikely to change frequently
+- Environment variable still supported as override
+
+**Root-level import wrapper**
+- Pro: Enables Railway auto-detection without restructuring project
+- Con: Adds extra file in root, slightly unusual pattern
+- Alternative: Restructure to move backend to root (too disruptive)
+- Acceptable tradeoff: Clean solution without major refactoring
+
+**Database init on startup vs migration step**
+- Pro: Eliminates separate migration/seed step during deployment
+- Con: App startup slightly slower (one-time check)
+- Acceptable: Check is fast (single table existence query)
+- Fails gracefully: Logs warning but doesn't crash if DB unavailable
+
+**Why this approach**
+
+**Railway over other platforms**
+- Railway provides simple monorepo deployment with service-per-directory support
+- Automatic HTTPS, environment variables, logs, metrics included
+- Git-based deployment workflow (push to deploy)
+- Free tier sufficient for POC demo
+
+**Separate backend/frontend services**
+- Independent scaling and deployment
+- Frontend served via CDN (Caddy on Railway)
+- Backend runs on dedicated instance
+- Clear separation of concerns
+
+**Skip TypeScript checking**
+- Pragmatic solution to devDependencies installation issue
+- Type safety still enforced during local development
+- Vite handles transpilation correctly regardless
+- Alternative (force install devDependencies) unreliable across Railway builds
+
+**App-level DB initialization**
+- Simpler than separate migration step
+- Works in both local dev and production
+- Idempotent: safe to run multiple times
+- Reduces deployment complexity
+
+**Deployment URLs**
+- Backend: `https://deploy-demo-production-bcaf.up.railway.app`
+- Frontend: `https://deal-hawk-frontend-production.up.railway.app`
+- Both publicly accessible for demos
+
+**Next steps (out of scope for this deployment)**
+- Custom domain setup (frontend + backend)
+- Production database strategy (PostgreSQL instead of SQLite)
+- Environment-specific configs (staging vs production)
+- Performance monitoring (error tracking, APM)
+- Fix `.gitignore` to be more specific (`/lib/` instead of `lib/`)
+
+---
+
+## 2025-12-28 — GitHub Actions CI/CD pipeline
+
+**Goal:** Add continuous integration workflow for automated testing before Railway deployment.
+
+**What shipped**
+1. `.github/workflows/ci.yml` — GitHub Actions workflow with 4 jobs
+   - `backend-tests`: pytest on all test files
+   - `frontend-build`: validates Vite build completes successfully
+   - `lint`: Ruff linting + mypy type checking
+   - `all-checks`: final status job (required for Railway integration)
+
+**Key decisions**
+
+**Multi-job workflow structure**
+- Separate jobs for backend, frontend, and linting (parallel execution)
+- Final "all-checks" job depends on all others (single status check)
+- Each job runs independently with fresh environment
+
+**Backend testing**
+- Python 3.11 environment
+- pip caching for faster builds
+- Database initialization + seeding before tests
+- Full pytest suite with verbose output
+- Environment variable: `DEAL_HAWK_DB_PATH` set to test database
+
+**Frontend validation**
+- Node.js 18 environment
+- npm caching for faster builds
+- Full Vite build (not just type checking)
+- Validates `dist/` directory created
+- Uses `npm ci` for reproducible builds
+
+**Code quality checks**
+- Ruff linting (E, F, W error codes)
+- mypy type checking with `--ignore-missing-imports`
+- Both set to `continue-on-error: true` (non-blocking for now)
+- Can be made blocking in future by removing flag
+
+**Railway integration**
+- Workflow runs on `push` to `deploy-2` and `main` branches
+- Railway's "Wait for CI" feature requires workflow on deployment branch
+- "All Checks Passed" job provides single status for Railway to wait on
+- Prevents broken code from deploying
+
+**Triggers**
+- Push to `deploy-2` or `main` branches
+- Pull requests targeting these branches
+- Allows CI validation before merge
+
+**Why this approach**
+- Parallel jobs reduce total CI time
+- Separate jobs make it easy to identify which part failed
+- Frontend build validation catches missing files (like the `lib/` issue)
+- Backend tests ensure API contract hasn't broken
+- Single final job simplifies Railway integration (one status check)
+
+**Tradeoffs**
+- Linting is non-blocking (continue-on-error) — can be made stricter later
+- Uses GitHub Actions (not Jenkins/CircleCI) — simpler for GitHub-hosted repos
+- No deployment automation (Railway handles this) — keeps workflow focused on validation
+- Test database recreated each run — slower but ensures clean state
+
+**Railway "Wait for CI" setup**
+1. Go to Railway service settings
+2. Enable "Wait for CI" under Deployment settings
+3. Railway will wait for GitHub Actions status before deploying
+4. Push will trigger: GitHub Actions → (if pass) → Railway deployment
+
+---

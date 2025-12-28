@@ -1,0 +1,113 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - prod
+  pull_request:
+    branches:
+      - prod
+
+jobs:
+  backend-tests:
+    name: Backend Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Initialize test database
+        run: |
+          python -m backend.db init
+          python scripts/seed_db.py
+      
+      - name: Run backend tests
+        run: |
+          pytest tests/ -v --tb=short
+        env:
+          DEAL_HAWK_DB_PATH: data/deal_hawk.sqlite3
+
+  frontend-build:
+    name: Frontend Build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+      
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+      
+      - name: Build frontend
+        working-directory: frontend
+        run: npm run build
+      
+      - name: Check build output
+        working-directory: frontend
+        run: |
+          if [ ! -d "dist" ]; then
+            echo "Build failed: dist directory not created"
+            exit 1
+          fi
+          echo "Build successful: dist directory created"
+
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+      
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run Ruff (linter)
+        run: |
+          pip install ruff
+          ruff check backend/ tests/ scripts/ --select E,F,W
+        continue-on-error: true
+      
+      - name: Run mypy (type checker)
+        run: |
+          pip install mypy
+          mypy backend/ --ignore-missing-imports
+        continue-on-error: true
+
+  all-checks:
+    name: All Checks Passed
+    runs-on: ubuntu-latest
+    needs: [backend-tests, frontend-build, lint]
+    
+    steps:
+      - name: All checks passed
+        run: echo "✅ All CI checks passed! Ready for deployment."
+

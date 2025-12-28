@@ -2,6 +2,9 @@
  * Base fetch wrapper for API calls.
  */
 
+// Get API base URL from environment variable, fallback to relative path for dev
+const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+
 /**
  * Generic GET request with query params support.
  * @param path - API path (e.g., "/api/overview")
@@ -26,7 +29,10 @@ export async function getJSON<T>(
     ? `${path}?${searchParams.toString()}`
     : path;
 
-  const response = await fetch(url);
+  // Prepend API base URL if provided (for production)
+  const fullUrl = API_BASE_URL ? `${API_BASE_URL}${url}` : url;
+
+  const response = await fetch(fullUrl);
 
   if (!response.ok) {
     throw new Error(`API error: ${response.status} ${response.statusText}`);
