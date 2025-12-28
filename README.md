@@ -4,9 +4,19 @@
 
 ## Current Status
 
-**Status:** Discovery and synthesis complete. MVP selected. Build phase in progress. (See `docs/00-overview/WORKPLAN.md` for timeline.)
+**Status:** MVP build complete. App is functional and running. Ready for deployment and demo preparation. (See `docs/00-overview/WORKPLAN.md` for timeline.)
 
 This is a timeboxed Build First sprint (48 hours) to demonstrate a Tenex-style approach: fast discovery, ruthless prioritization, and clean delivery of a small but real workflow improvement.
+
+**What's working:**
+- ✅ SQLite database with full schema (products, retailers, listings, price_snapshots, alert_events)
+- ✅ Seed data: 10 products across 3 retailers (Amazon, Best Buy, Target)
+- ✅ Idempotent seeding (preserves price history on re-runs)
+- ✅ Price ingestion with fixture-based connectors (deterministic pricing)
+- ✅ Delta computation over configurable time windows
+- ✅ Alert evaluation and event creation with deduplication
+- ✅ Streamlit UI with overview, detail views, and alert log
+- ✅ Test suite covering seed integrity, alert logic, and pricing calculations
 
 ## MVP Scope (Current Build)
 
@@ -38,7 +48,7 @@ The Price Monitoring POC validates the core mechanism: **automated monitoring �
 deal-hawk/
 ├── app/                    # Streamlit web app (UI)
 ├── backend/               # Domain + DB + services (Python package)
-│   ├── db.py              # SQLite connection + schema (TBD)
+│   ├── db.py              # SQLite connection + schema
 │   ├── connectors/        # Retailer connectors (fixtures for POC)
 │   └── services/          # Business logic (ingest, pricing, alerts)
 ├── data/                  # Seed data and synthetic datasets
@@ -50,8 +60,8 @@ deal-hawk/
 │   └── 03-roadmap/        # Build plan, demo plan, roadmap
 ├── infra/                 # Deployment/infrastructure configs (TBD)
 ├── scripts/               # Utility scripts
-│   ├── seed_db.py         # Seed products/retailers/listings (TBD)
-│   └── run_ingest.py      # Run price ingestion cycle (TBD)
+│   ├── seed_db.py         # Seed products/retailers/listings (idempotent)
+│   └── run_ingest.py      # Run price ingestion cycle
 └── tests/                 # Unit tests (TBD)
 ```
 
@@ -60,7 +70,7 @@ deal-hawk/
 ### Prerequisites
 
 - **Python:** 3.11+ (see `docs/00-overview/ENGINEERING_STANDARDS.md`)
-- **Dependency manager:** TBD (no `requirements.txt`, `pyproject.toml`, `poetry.lock`, or `uv.lock` found)
+- **Dependencies:** See `requirements.txt`
 - **Database:** SQLite (local file, no setup required)
 
 ### Setup
@@ -79,30 +89,32 @@ deal-hawk/
 
 3. **Install dependencies:**
    ```bash
-   # TBD: Add dependency file (requirements.txt or pyproject.toml)
-   # pip install -r requirements.txt
+   pip install -r requirements.txt
    ```
 
 4. **Initialize the database:**
    ```bash
-   # TBD: Create backend/db.py with schema initialization
-   # python -m backend.db init
+   python -m backend.db init
    ```
 
-### Seed Data
+5. **Seed data:**
+   ```bash
+   python scripts/seed_db.py
+   ```
 
-```bash
-# TBD: Create scripts/seed_db.py
-# python scripts/seed_db.py
-```
+   This populates the database with ~10 products across ≥3 retailers from `data/seed_listings.json`. The seed script is **idempotent**: running it multiple times will not create duplicate products or listings, and it preserves existing price history.
 
-Expected seed data: `data/seed_listings.json` with ~10 products across ≥3 retailers. (See `docs/03-roadmap/BUILD_PLAN.md` section 2.)
+   **Verification:** Re-running seed should NOT change listing count or delete snapshots. Verify with:
+   ```bash
+   sqlite3 data/deal_hawk.sqlite3 "SELECT COUNT(*) FROM listings;"
+   sqlite3 data/deal_hawk.sqlite3 "SELECT COUNT(*) FROM price_snapshots;"
+   ```
+   These counts should remain unchanged after re-seeding. (See `docs/03-roadmap/BUILD_PLAN.md` section 2.)
 
 ### Run Price Ingestion Cycle
 
 ```bash
-# TBD: Create scripts/run_ingest.py
-# python scripts/run_ingest.py
+python scripts/run_ingest.py
 ```
 
 Each ingest cycle writes `price_snapshots` for all seeded listings. Retailer connectors start as fixtures (see `docs/03-roadmap/BUILD_PLAN.md` section 3).
@@ -110,8 +122,7 @@ Each ingest cycle writes `price_snapshots` for all seeded listings. Retailer con
 ### Run Streamlit App
 
 ```bash
-# TBD: Create app/main.py or app/streamlit_app.py
-# streamlit run app/main.py
+streamlit run app/main.py
 ```
 
 The UI should show:
@@ -122,9 +133,15 @@ The UI should show:
 ### Run Tests
 
 ```bash
-# TBD: Create tests/ directory with pytest tests
-# pytest tests/
+pytest -q
 ```
+
+The test suite includes `tests/test_seed_integrity.py`, which verifies that seeding is idempotent and does not delete price history. This test serves as a guardrail to ensure:
+- Seed operations do not decrease `price_snapshots` or `alert_events` counts
+- Seed operations do not increase `products`, `retailers`, or `listings` counts
+- Listing IDs remain stable across seed runs
+- Ingest operations create exactly one snapshot per active listing
+- Products table enforces uniqueness constraints
 
 Minimum test coverage: deal detection logic (thresholds, edge cases) and parsing/normalization logic. Tests must be deterministic (no network calls). (See `docs/00-overview/ENGINEERING_STANDARDS.md`.)
 
@@ -218,50 +235,16 @@ See `LICENSE` file.
 
 ---
 
-## Missing Information (TBD)
+## Next Steps
 
-The following items need to be defined to complete the setup:
+**Immediate priorities:**
+1. **Deployment:** Set up hosting (e.g., Streamlit Community Cloud, Fly.io, or Railway)
+2. **Demo video:** Record <10 minute walkthrough demonstrating the full workflow
+3. **Documentation polish:** Final pass on README and docs for submission
 
-1. **Dependency management:**
-   - No `requirements.txt`, `pyproject.toml`, `poetry.lock`, or `uv.lock` found
-   - **Next step:** Create dependency file (e.g., `requirements.txt` or `pyproject.toml`) with:
-     - `streamlit`
-     - `pydantic`
-     - `pytest` (for tests)
-     - SQLite support (built-in, but may need `aiosqlite` for async)
-
-2. **Database initialization:**
-   - `backend/db.py` does not exist
-   - **Next step:** Create `backend/db.py` with:
-     - SQLite connection logic
-     - Schema creation function (idempotent)
-     - Tables: `products`, `retailers`, `listings`, `price_snapshots`, `alert_events`
-
-3. **Seed data script:**
-   - `scripts/seed_db.py` does not exist
-   - `data/seed_listings.json` does not exist
-   - **Next step:** Create seed data file and script to populate initial products/retailers/listings
-
-4. **Ingestion script:**
-   - `scripts/run_ingest.py` does not exist
-   - `backend/connectors/fixtures.py` does not exist
-   - `backend/services/ingest.py` does not exist
-   - **Next step:** Implement fixture-based connectors and ingestion service
-
-5. **Streamlit app:**
-   - `app/` directory is empty
-   - **Next step:** Create `app/main.py` or `app/streamlit_app.py` with overview, detail, and alert views
-
-6. **Test suite:**
-   - `tests/` directory is empty
-   - **Next step:** Create pytest tests for:
-     - Delta computation (`backend/services/pricing.py`)
-     - Alert trigger logic (`backend/services/alerts.py`)
-
-7. **Formatting/linting:**
-   - No formatter/linter config found (e.g., `.ruff.toml`, `.black`, `pyproject.toml` with tool configs)
-   - **Next step:** Add formatter/linter config (e.g., `ruff` or `black` + `mypy`)
-
-8. **Makefile (optional):**
-   - No `Makefile` found
-   - **Next step:** Consider adding `Makefile` with common commands (seed, ingest, run, test)
+**Future enhancements (post-MVP):**
+- Replace fixture connectors with real retailer integrations (APIs or RSS feeds)
+- Add external alert delivery (email, Slack, Discord, Zapier)
+- Implement background scheduling for automated ingestion
+- Add multi-user support with authentication
+- Migrate from SQLite to Postgres for production scale
