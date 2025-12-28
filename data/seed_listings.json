@@ -1,0 +1,57 @@
+{
+    "retailers": ["Amazon", "Best Buy", "Target"],
+    "products": [
+      { "name": "Apple AirPods Pro (2nd gen)", "brand": "Apple", "model": "AirPods Pro 2" },
+      { "name": "Apple AirPods (3rd gen)", "brand": "Apple", "model": "AirPods 3" },
+      { "name": "Apple AirTag (4-pack)", "brand": "Apple", "model": "AirTag 4-pack" },
+      { "name": "Apple iPad (10th gen) 64GB", "brand": "Apple", "model": "iPad 10" },
+      { "name": "Apple iPad Air 11-inch 128GB", "brand": "Apple", "model": "iPad Air 11" },
+      { "name": "Apple Watch Series 9 41mm", "brand": "Apple", "model": "Watch S9 41" },
+      { "name": "Apple Watch SE 40mm", "brand": "Apple", "model": "Watch SE 40" },
+      { "name": "Apple MacBook Air 13-inch (M2) 256GB", "brand": "Apple", "model": "MBA M2 13" },
+      { "name": "Apple Pencil (2nd gen)", "brand": "Apple", "model": "Pencil 2" },
+      { "name": "Apple TV 4K (3rd gen)", "brand": "Apple", "model": "Apple TV 4K 3" }
+    ],
+    "listings": [
+      { "product_index": 0, "retailer": "Amazon",   "url": "https://example.com/amazon/airpods-pro-2", "base_price_cents": 24900, "step_cents": -500, "period": 6 },
+      { "product_index": 0, "retailer": "Best Buy", "url": "https://example.com/bestbuy/airpods-pro-2", "base_price_cents": 24900, "step_cents": -300, "period": 5 },
+      { "product_index": 0, "retailer": "Target",   "url": "https://example.com/target/airpods-pro-2", "base_price_cents": 24900, "step_cents": -400, "period": 7 },
+  
+      { "product_index": 1, "retailer": "Amazon",   "url": "https://example.com/amazon/airpods-3", "base_price_cents": 17900, "step_cents": -200, "period": 5 },
+      { "product_index": 1, "retailer": "Best Buy", "url": "https://example.com/bestbuy/airpods-3", "base_price_cents": 17900, "step_cents": -150, "period": 6 },
+      { "product_index": 1, "retailer": "Target",   "url": "https://example.com/target/airpods-3", "base_price_cents": 17900, "step_cents": -250, "period": 7 },
+  
+      { "product_index": 2, "retailer": "Amazon",   "url": "https://example.com/amazon/airtag-4", "base_price_cents": 9900, "step_cents": -100, "period": 6 },
+      { "product_index": 2, "retailer": "Best Buy", "url": "https://example.com/bestbuy/airtag-4", "base_price_cents": 9999, "step_cents": -120, "period": 5 },
+      { "product_index": 2, "retailer": "Target",   "url": "https://example.com/target/airtag-4", "base_price_cents": 9999, "step_cents": -80, "period": 7 },
+  
+      { "product_index": 3, "retailer": "Amazon",   "url": "https://example.com/amazon/ipad-10-64", "base_price_cents": 34900, "step_cents": -700, "period": 6 },
+      { "product_index": 3, "retailer": "Best Buy", "url": "https://example.com/bestbuy/ipad-10-64", "base_price_cents": 34900, "step_cents": -500, "period": 5 },
+      { "product_index": 3, "retailer": "Target",   "url": "https://example.com/target/ipad-10-64", "base_price_cents": 34900, "step_cents": -600, "period": 7 },
+  
+      { "product_index": 4, "retailer": "Amazon",   "url": "https://example.com/amazon/ipad-air-11-128", "base_price_cents": 59900, "step_cents": -800, "period": 6 },
+      { "product_index": 4, "retailer": "Best Buy", "url": "https://example.com/bestbuy/ipad-air-11-128", "base_price_cents": 59900, "step_cents": -900, "period": 5 },
+      { "product_index": 4, "retailer": "Target",   "url": "https://example.com/target/ipad-air-11-128", "base_price_cents": 59900, "step_cents": -700, "period": 7 },
+  
+      { "product_index": 5, "retailer": "Amazon",   "url": "https://example.com/amazon/watch-s9-41", "base_price_cents": 39900, "step_cents": -400, "period": 6 },
+      { "product_index": 5, "retailer": "Best Buy", "url": "https://example.com/bestbuy/watch-s9-41", "base_price_cents": 39900, "step_cents": -300, "period": 5 },
+      { "product_index": 5, "retailer": "Target",   "url": "https://example.com/target/watch-s9-41", "base_price_cents": 39900, "step_cents": -350, "period": 7 },
+  
+      { "product_index": 6, "retailer": "Amazon",   "url": "https://example.com/amazon/watch-se-40", "base_price_cents": 24900, "step_cents": -250, "period": 6 },
+      { "product_index": 6, "retailer": "Best Buy", "url": "https://example.com/bestbuy/watch-se-40", "base_price_cents": 24900, "step_cents": -200, "period": 5 },
+      { "product_index": 6, "retailer": "Target",   "url": "https://example.com/target/watch-se-40", "base_price_cents": 24900, "step_cents": -220, "period": 7 },
+  
+      { "product_index": 7, "retailer": "Amazon",   "url": "https://example.com/amazon/mba-m2-13-256", "base_price_cents": 99900, "step_cents": -1500, "period": 6 },
+      { "product_index": 7, "retailer": "Best Buy", "url": "https://example.com/bestbuy/mba-m2-13-256", "base_price_cents": 99900, "step_cents": -1200, "period": 5 },
+      { "product_index": 7, "retailer": "Target",   "url": "https://example.com/target/mba-m2-13-256", "base_price_cents": 99900, "step_cents": -1300, "period": 7 },
+  
+      { "product_index": 8, "retailer": "Amazon",   "url": "https://example.com/amazon/pencil-2", "base_price_cents": 12900, "step_cents": -150, "period": 6 },
+      { "product_index": 8, "retailer": "Best Buy", "url": "https://example.com/bestbuy/pencil-2", "base_price_cents": 12900, "step_cents": -100, "period": 5 },
+      { "product_index": 8, "retailer": "Target",   "url": "https://example.com/target/pencil-2", "base_price_cents": 12900, "step_cents": -120, "period": 7 },
+  
+      { "product_index": 9, "retailer": "Amazon",   "url": "https://example.com/amazon/appletv-4k-3", "base_price_cents": 12900, "step_cents": -200, "period": 6 },
+      { "product_index": 9, "retailer": "Best Buy", "url": "https://example.com/bestbuy/appletv-4k-3", "base_price_cents": 12900, "step_cents": -150, "period": 5 },
+      { "product_index": 9, "retailer": "Target",   "url": "https://example.com/target/appletv-4k-3", "base_price_cents": 12900, "step_cents": -180, "period": 7 }
+    ]
+  }
+  
