@@ -1,28 +1,38 @@
 # Project Brief 
 
 ## What this is
-NAME PENDING is a timeboxed Build First sprint to demonstrate a Tenex-style approach:
+**Deal Hawk** is a timeboxed Build First sprint to demonstrate a Tenex-style approach:
 - fast, user-centered discovery
 - ruthless prioritization
 - clean delivery of a small but real workflow
 
-This document is intentionally **pre-interview** and will be updated after discovery.
+**Status:** Discovery and synthesis complete. MVP selected. Ready for build phase.
 
-## Current hypothesis (NOT confirmed yet)
-We believe a meaningful bottleneck exists in the company’s buying/resale operations and their management of staff-level of sellers, given their business model. 
+## INITIAL HYPOTHESIS
+We believe a meaningful bottleneck exists in the company’s buying/resale operations and their 
+management of staff-level of sellers, given their business model. 
+## Confirmed hypothesis (from discovery)
+The business's growth is mechanically constrained by deal volume, which is constrained by **scouting speed**. The primary bottleneck is **manual deal monitoring** and the lack of speed in identifying purchase opportunities, then notifying buyers fast enough to catch the deal window.
 
-**This is a hypothesis.** Discovery will confirm the real workflow, users, constraints, and ROI.
+**Evidence:** Exec stakeholder explicitly states: "We are held back by the lack of speed in identifying purchase opportunities, and then... notifying a wide network of... buyers fast enough." Deal scouting is the throughput ceiling; even with alerts, monitoring remains largely manual.
 
-## Discovery goals (next 48 hours)
-1) Identify and map 1–2 critical workflows (as-is)
-2) Select ONE high-leverage “moment of decision” to accelerate
-3) Quantify baseline pain (time/week, frequency, estimated $ impact)
-4) Define a measurable MVP that improves an outcome
+## Discovery outcomes (completed)
+✅ **Workflow mapping:** As-is purchasing cycle mapped with bottlenecks identified  
+✅ **Stakeholder interviews:** Exec-01 interview completed and synthesized  
+✅ **Pain quantification:** Speed constraint identified as primary bottleneck; opportunity cost framed as lost revenue  
+✅ **MVP selection:** Price Monitoring POC selected (see `docs/02-synthesis/MVP_DECISION.md`)
 
-## Target users (initial assumption)
-- Exec stakeholders with end-to-end visibility (Exec-01, Exec-02 TIME PERMISSIBLE)
+## Selected MVP
+**Price Monitoring POC** — Track ~10 products across ≥3 retailers, record price snapshots over time, show price deltas, and demonstrate simulated "alert trigger" flow. This validates the highest-leverage bottleneck: automated deal scouting → normalized price history → detectable change → alertable event.
 
-All user artifacts stored in-repo will be anonymized and redacted.
+**Full scope:** See `docs/02-synthesis/MVP_DECISION.md`  
+**ROI rationale:** See `docs/02-synthesis/ROI_PRIORITIZATION.md`
+
+## Target users (confirmed from discovery)
+- **Primary:** Exec stakeholders with end-to-end visibility (Exec-01 interviewed)
+- **Secondary:** Single operator (EMPLOYEE A) who bridges scouting → posting → buyer comms (key-person bottleneck identified)
+
+All user artifacts stored in-repo are anonymized and redacted.
 
 ## Output goals (Build First submission)
 A functional, deployed prototype demonstrating:
