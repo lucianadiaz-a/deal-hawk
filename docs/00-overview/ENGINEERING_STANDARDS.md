@@ -21,7 +21,7 @@ If a tradeoff is required, optimize for **reliability + clarity** over clevernes
 - Validate inputs and return meaningful HTTP errors (no generic 500s).
 - Never log secrets.
 
-## Streamlit standards
+## Frontend standards
 - UI reads from API/services; avoid embedding core logic in the UI.
 - Handle API failure states gracefully (clear error messages).
 - Keep state management explicit and minimal.

@@ -15,7 +15,7 @@
 ---
 
 ## Live demo clickpath (2–4 minutes)
-1) Open Streamlit overview: show 10×≥3 coverage, “last updated”
+1) Open React overview: show 10×≥3 coverage, "last updated"
 2) Click a product/listing: show snapshot history + delta window
 3) Trigger “Run ingest now”: show timestamp and/or price changes update
 4) Trigger “Simulate drop”: show an `AlertEvent` created

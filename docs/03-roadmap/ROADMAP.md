@@ -12,7 +12,7 @@ Prove the core mechanism: automated monitoring → normalized price history → 
 - Store price snapshots over time
 - Compute deltas over a configurable window (e.g., last X hours)
 - Generate an `AlertEvent` when a rule triggers (simulated trigger + tests)
-- Streamlit UI:
+- React UI:
   - current prices + deltas
   - snapshot history (per listing/product)
   - alert log + alert preview
