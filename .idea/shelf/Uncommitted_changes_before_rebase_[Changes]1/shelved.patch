@@ -1,0 +1,171 @@
+Index: frontend/tsconfig.app.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\n  \"compilerOptions\": {\n    \"tsBuildInfoFile\": \"./node_modules/.tmp/tsconfig.app.tsbuildinfo\",\n    \"target\": \"ES2022\",\n    \"useDefineForClassFields\": true,\n    \"lib\": [\"ES2022\", \"DOM\", \"DOM.Iterable\"],\n    \"module\": \"ESNext\",\n    \"types\": [\"vite/client\", \"react\", \"react-dom\"],\n    \"skipLibCheck\": true,\n\n    /* Bundler mode */\n    \"moduleResolution\": \"bundler\",\n    \"allowImportingTsExtensions\": false,\n    \"allowSyntheticDefaultImports\": true,\n    \"esModuleInterop\": true,\n    \"verbatimModuleSyntax\": false,\n    \"moduleDetection\": \"force\",\n    \"noEmit\": true,\n    \"jsx\": \"react-jsx\",\n    \"resolveJsonModule\": true,\n    \"isolatedModules\": true,\n    \"baseUrl\": \"src\",\n\n    /* Linting */\n    \"strict\": true,\n    \"noUnusedLocals\": true,\n    \"noUnusedParameters\": true,\n    \"noFallthroughCasesInSwitch\": true\n  },\n  \"include\": [\"src\"]\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/frontend/tsconfig.app.json b/frontend/tsconfig.app.json
+--- a/frontend/tsconfig.app.json	(revision ae999abaccd16a3746327f3791e6a8626f58da33)
++++ b/frontend/tsconfig.app.json	(date 1766973239327)
+@@ -5,7 +5,7 @@
+     "useDefineForClassFields": true,
+     "lib": ["ES2022", "DOM", "DOM.Iterable"],
+     "module": "ESNext",
+-    "types": ["vite/client", "react", "react-dom"],
++    "types": ["vite/client"],
+     "skipLibCheck": true,
+ 
+     /* Bundler mode */
+@@ -13,6 +13,8 @@
+     "allowImportingTsExtensions": false,
+     "allowSyntheticDefaultImports": true,
+     "esModuleInterop": true,
++    "verbatimModuleSyntax": false,
++    "allowImportingTsExtensions": true,
+     "verbatimModuleSyntax": false,
+     "moduleDetection": "force",
+     "noEmit": true,
+@@ -20,6 +22,8 @@
+     "resolveJsonModule": true,
+     "isolatedModules": true,
+     "baseUrl": "src",
++    "resolveJsonModule": true,
++    "isolatedModules": true,
+ 
+     /* Linting */
+     "strict": true,
+Index: RAILWAY_FRONTEND_FIX_FINAL.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/RAILWAY_FRONTEND_FIX_FINAL.md b/RAILWAY_FRONTEND_FIX_FINAL.md
+new file mode 100644
+--- /dev/null	(date 1766973199706)
++++ b/RAILWAY_FRONTEND_FIX_FINAL.md	(date 1766973199706)
+@@ -0,0 +1,56 @@
++# Final Fix: Railway Frontend Build Error (EBUSY)
++
++## The Problem
++`npm ci` tries to clean `node_modules/.vite` but it's locked during Railway's Docker build.
++
++## Solution: Use npm install + Set Cache Directory
++
++### Step 1: Update Build Command in Railway
++
++Go to Railway frontend service → Settings → Build & Deploy
++
++**Build Command:**
++```bash
++npm install && npm run build
++```
++
++**Also add Environment Variable:**
++- Name: `VITE_CACHE_DIR`
++- Value: `/tmp/.vite`
++
++This tells Vite to use `/tmp` instead of `node_modules/.vite` for cache.
++
++### Step 2: Alternative (If Step 1 doesn't work)
++
++**Build Command:**
++```bash
++VITE_CACHE_DIR=/tmp/.vite npm install && npm run build
++```
++
++This sets the cache directory inline.
++
++### Step 3: Nuclear Option (If nothing works)
++
++**Build Command:**
++```bash
++npm install --legacy-peer-deps && npm run build
++```
++
++Or:
++
++```bash
++npm install --no-audit --no-fund && npm run build
++```
++
++## Why This Works
++
++- `npm install` is more forgiving than `npm ci` and won't try to aggressively clean locked directories
++- Setting `VITE_CACHE_DIR` to `/tmp/.vite` avoids the locked `node_modules/.vite` directory entirely
++- `/tmp` is a writable directory that won't have lock issues
++
++## Try This Order
++
++1. **First:** `npm install && npm run build` (with `VITE_CACHE_DIR=/tmp/.vite` env var)
++2. **If that fails:** `VITE_CACHE_DIR=/tmp/.vite npm install && npm run build`
++3. **Last resort:** `npm install --legacy-peer-deps && npm run build`
++
+Index: RAILWAY_FRONTEND_FIX.md
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/RAILWAY_FRONTEND_FIX.md b/RAILWAY_FRONTEND_FIX.md
+new file mode 100644
+--- /dev/null	(date 1766973199705)
++++ b/RAILWAY_FRONTEND_FIX.md	(date 1766973199705)
+@@ -0,0 +1,58 @@
++# Fix: Railway Frontend Build Error (EBUSY)
++
++## Problem
++```
++npm error EBUSY: resource busy or locked, rmdir '/app/node_modules/.vite'
++```
++
++This happens because Vite's cache directory is locked during the build process on Railway.
++
++## Solution 1: Skip Cleanup (Try This First)
++
++**Build Command:**
++```bash
++npm ci && npm run build
++```
++
++Just use the standard build command without trying to remove `.vite`. Railway's fresh builds shouldn't have this issue.
++
++## Solution 2: Use npm install Instead
++
++If Solution 1 doesn't work, try:
++
++**Build Command:**
++```bash
++npm install && npm run build
++```
++
++`npm install` is more forgiving than `npm ci` and might handle the locked directory better.
++
++## Solution 3: Build Without Clean Install
++
++**Build Command:**
++```bash
++npm install --prefer-offline && npm run build
++```
++
++This uses cached packages and might avoid the lock issue.
++
++## Solution 4: Force Clean Build (Nuclear Option)
++
++If nothing else works:
++
++**Build Command:**
++```bash
++npm install --force && npm run build
++```
++
++## Recommended: Start with Solution 1
++
++1. Go to Railway frontend service → Settings → Build & Deploy
++2. Set Build Command to: `npm ci && npm run build`
++3. Redeploy
++
++If that fails, try Solution 2, then 3, then 4.
++
++## Why This Happens
++
++Railway's Docker build environment sometimes locks files during the build process. The `.vite` cache directory can get locked, preventing cleanup. Using a simpler build command often works better.

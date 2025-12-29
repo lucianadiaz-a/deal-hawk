@@ -4,7 +4,7 @@
 
 ## Current Status
 
-**Status:** MVP build complete. App is functional and running. Ready for deployment and demo preparation. (See `docs/00-overview/WORKPLAN.md` for timeline.)
+**Status:** MVP build complete and deployed. App is functional and running in production. Ready for demo submission. (See `docs/00-overview/WORKPLAN.md` for timeline.)
 
 This is a timeboxed Build First sprint (48 hours) to demonstrate a Tenex-style approach: fast discovery, ruthless prioritization, and clean delivery of a small but real workflow improvement.
 
@@ -16,7 +16,11 @@ This is a timeboxed Build First sprint (48 hours) to demonstrate a Tenex-style a
 - ✅ Delta computation over configurable time windows
 - ✅ Alert evaluation and event creation with deduplication
 - ✅ React UI with overview, detail views, and alert log
+- ✅ Push Deal workflow simulation (Wizard-of-Oz demo feature)
+- ✅ Frozen demo database for consistent, repeatable demos
 - ✅ Test suite covering seed integrity, alert logic, and pricing calculations
+- ✅ CI/CD pipeline with GitHub Actions (backend tests, frontend build validation, linting)
+- ✅ Production deployment on Railway (backend + frontend)
 
 ## MVP Scope (Current Build)
 
@@ -141,10 +145,12 @@ uvicorn backend.api.main:app --reload --port 8000
 
 The API will be available at `http://localhost:8000` with:
 - **Interactive docs**: `http://localhost:8000/docs` (Swagger UI)
-- **Health check**: `GET /health`
-- **Overview**: `GET /api/overview`
-- **Products list**: `GET /api/products`
-- **Product detail**: `GET /api/products/{product_id}`
+- **Health check**: `GET /health` (returns DB path and status)
+- **Overview**: `GET /api/overview` (metrics, recent alerts, near misses)
+- **Products list**: `GET /api/products` (with filtering, sorting, pagination)
+- **Product detail**: `GET /api/products/{product_id}` (product info with listings)
+- **Listing price history**: `GET /api/listings/{listing_id}/price-history`
+- **Product alert history**: `GET /api/products/{product_id}/alert-history`
 
 The API automatically connects to the SQLite database.
 
@@ -165,9 +171,9 @@ npm run dev
 ```
 
 The React app will be available at `http://localhost:5173` with:
-- Overview page at `/` (calls `/api/overview`)
-- Products list at `/products` (calls `/api/products`)
-- Product detail at `/products/:id` (calls `/api/products/:id`)
+- Overview page at `/` (calls `/api/overview`) — metrics, recent alerts, near misses
+- Products list at `/products` (calls `/api/products`) — filterable product grid with pagination
+- Product detail at `/products/:id` (calls `/api/products/:id`) — multi-retailer comparison, price charts, alert history
 
 **Note:** The frontend dev server proxies `/api/*` and `/health` to `http://localhost:8000`, so you need the FastAPI server running.
 
@@ -318,7 +324,23 @@ Minimum test coverage: deal detection logic (thresholds, edge cases) and parsing
 
 **Note:** The project brief mentions Postgres as the system of record (`docs/00-overview/PROJECT_BRIEF.md`), but the build plan specifies SQLite for the POC (`docs/03-roadmap/BUILD_PLAN.md`). SQLite is used for local development; Postgres would be used for production deployment.
 
-## Deployment Notes
+## Deployment
+
+**Production URLs:**
+- **Frontend:** https://deal-hawk-frontend-production.up.railway.app
+- **Backend API:** https://deploy-demo-production-bcaf.up.railway.app
+- **API Docs:** https://deploy-demo-production-bcaf.up.railway.app/docs
+
+**Deployment Platform:** Railway (separate services for backend and frontend)
+- Backend: Python service with `main.py` root-level entry point for Railway auto-detection
+- Frontend: Static site service serving Vite-built React app
+- Database: SQLite file (auto-initialized on first startup)
+
+**CI/CD:** GitHub Actions workflow (`.github/workflows/ci.yml`) runs on push to `main` and `deploy-2` branches:
+- Backend tests (pytest)
+- Frontend build validation (Vite)
+- Code quality checks (Ruff linting, mypy type checking)
+- Railway "Wait for CI" integration prevents broken code from deploying
 
 **For cloud deployments:**
 1. **Do NOT commit the SQLite database file** (`data/deal_hawk.sqlite3`) to version control.
@@ -328,6 +350,9 @@ Minimum test coverage: deal detection logic (thresholds, edge cases) and parsing
 
 **Environment variables:**
 - `DEAL_HAWK_DB_PATH`: Override default database path (default: `data/deal_hawk.sqlite3`)
+- `FRONTEND_URL`: Override frontend URL for CORS (optional, production URL hardcoded)
+- `PORT`: Railway-provided port for backend service
+- `VITE_API_URL`: Frontend environment variable for backend API URL
 
 ## Demo Instructions
 
@@ -382,9 +407,8 @@ See `LICENSE` file.
 ## Next Steps
 
 **Immediate priorities:**
-1. **Deployment:** Set up hosting (e.g., Fly.io, Railway, or Vercel)
-2. **Demo video:** Record <10 minute walkthrough demonstrating the full workflow
-3. **Documentation polish:** Final pass on README and docs for submission
+1. **Demo video:** Record <10 minute walkthrough demonstrating the full workflow
+2. **Final submission:** Prepare demo package with video, repo link, and live deployment URLs
 
 **Future enhancements (post-MVP):**
 - Replace fixture connectors with real retailer integrations (APIs or RSS feeds)
@@ -392,3 +416,5 @@ See `LICENSE` file.
 - Implement background scheduling for automated ingestion
 - Add multi-user support with authentication
 - Migrate from SQLite to Postgres for production scale
+- Backend persistence for Push Deal workflow (currently session-only)
+- Custom domain setup for production URLs

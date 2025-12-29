@@ -946,3 +946,38 @@ Keeps DB access safe and consistent; supports the core use case (latest + window
 4. Push will trigger: GitHub Actions → (if pass) → Railway deployment
 
 ---
+
+## 2025-12-28 — Documentation finalization
+
+**Goal:** Ensure all documentation (README, WORKPLAN, PROJECT_DIARY) accurately reflects current project state before demo submission.
+
+**What updated**
+1. README.md — Added deployment section with production URLs, CI/CD information, Push Deal feature
+2. WORKPLAN.md — Marked Phase 4 (Deploy + demo) as complete, updated progress summary
+3. PROJECT_DIARY.md — Verified completeness, added final summary entry
+
+**Key updates**
+- Current status reflects deployment completion (not "ready for deployment")
+- Production URLs documented (frontend + backend on Railway)
+- CI/CD pipeline details added to README
+- Push Deal feature added to "What's working" checklist
+- Next Steps updated (removed deployment, focused on demo video)
+- WORKPLAN Phase 4 marked complete with deliverables listed
+
+**Why this matters**
+- Accurate documentation is critical for demo submission
+- Production URLs enable reviewers to test live deployment
+- CI/CD details demonstrate production-grade practices
+- Complete feature list shows full MVP scope delivered
+
+**Project status summary**
+- ✅ All MVP acceptance criteria met
+- ✅ Full-stack application (React + FastAPI + SQLite)
+- ✅ Production deployment (Railway)
+- ✅ CI/CD pipeline (GitHub Actions)
+- ✅ Comprehensive test suite
+- ✅ Frozen demo database for consistent demos
+- ✅ Push Deal workflow simulation
+- ⏳ Demo video recording (final step)
+
+---
